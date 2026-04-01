@@ -1,17 +1,43 @@
-// register.tsx
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { globalStyles } from "./globalStyles";
+import { BASE_URL } from "@/config";
 import { useRouter } from "expo-router";
 
-export default function Register() {
-  const router = useRouter();
+export default function Register({ navigation }: any) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const router = useRouter();
 
-  const handleRegister = () => {
-    console.log("Register:", name, email, password);
+  const handleRegister = async () => {
+    try {
+      const res = await fetch(`${BASE_URL}/api/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_name: name,
+          user_email: email,
+          password: password,
+          phone_num: phone,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.status === 201) {
+        Alert.alert("Success", data.message);
+        router.push("/");
+      } else {
+        Alert.alert("Error", data.message || "Registration failed");
+      }
+    } catch (err) {
+      console.log(err);
+      Alert.alert("Error", "Could not connect to server");
+    }
   };
 
   return (
@@ -35,6 +61,14 @@ export default function Register() {
       />
 
       <TextInput
+        placeholder="Phone Number"
+        placeholderTextColor="#8B949E"
+        style={globalStyles.input}
+        value={phone}
+        onChangeText={setPhone}
+      />
+
+      <TextInput
         placeholder="Password"
         placeholderTextColor="#8B949E"
         secureTextEntry
@@ -48,12 +82,6 @@ export default function Register() {
         onPress={handleRegister}
       >
         <Text style={globalStyles.buttonText}>Register</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity onPress={() => router.push("/login")}>
-        <Text style={globalStyles.linkText}>
-          Already have an account? Login
-        </Text>
       </TouchableOpacity>
     </View>
   );
