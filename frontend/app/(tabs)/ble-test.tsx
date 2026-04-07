@@ -8,6 +8,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { bleManager } from "../../src/core/ble/bleManager";
+import { startBLEServer } from "../../src/core/ble/nativeServer";
 
 export default function Ble() {
   const [devices, setDevices] = useState<any[]>([]);
@@ -19,6 +20,7 @@ export default function Ble() {
     const init = async () => {
       try {
         await bleManager.initializeBLE();
+        startBLEServer(); // Start ble server
         setReady(true);
         console.log("BLE Ready");
       } catch (error) {
